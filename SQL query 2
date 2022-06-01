@@ -1,0 +1,41 @@
+--Count number of trip users by day of week
+WITH
+  WeekTable AS (
+  SELECT
+    c.day_of_week AS WeekDay,
+    ride_per_day_member,
+    ride_per_day_casual
+  FROM (
+    SELECT
+      day_of_week,
+      COUNT(day_of_week) AS ride_per_day_casual
+    FROM
+      `cyclistic-351112.uniondata2021.2021_casual`
+    GROUP BY
+      day_of_week
+    ORDER BY
+      day_of_week) AS c
+  JOIN (
+    SELECT
+      day_of_week,
+      COUNT(day_of_week) AS ride_per_day_member
+    FROM
+      `cyclistic-351112.uniondata2021.2021_member`
+    GROUP BY
+      day_of_week
+    ORDER BY
+      day_of_week) AS m
+  ON
+    m.day_of_week=c.day_of_week
+  ORDER BY
+    c.day_of_week)
+  -- Average value by users weekly per day
+SELECT
+  ROUND(AVG(ride_per_day_member),0) AS AVG_day_member,
+  ROUND(AVG(ride_per_day_casual),0) AS AVG_day_casual
+FROM
+  WeekTable
+  --Average value by users in working days
+  --WHERE WeekDay between 1 and 5
+  --and  weekends
+  --WHERE WeekDay between 6 and 7
