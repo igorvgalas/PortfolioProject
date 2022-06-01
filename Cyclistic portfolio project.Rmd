@@ -1,0 +1,90 @@
+---
+title: "Cyclistic portfolio project"
+author: "Ihor Halas"
+date: '2022-05-31'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Install packages and run
+```{r install packages, echo=TRUE}
+library(tidyverse)
+library(ggplot2)  
+```
+
+## My Cyclistic portfolio project
+
+### Step 1 Run and review our dataframe
+
+
+```{r Ride data for manual and casual users }
+all_2022_v2<-read_csv("all_2022_v2.csv")
+head(all_2022_v2)
+```
+
+### Step 2 Lets make some calculations
+
+#### 1.Descriptive analysis on ride_length (all figures in seconds)
+```{r Descriptive analysis on ride_length}
+mean(all_2022_v2$ride_length) #straight average (total ride length / rides)
+median(all_2022_v2$ride_length) #midpoint number in the ascending array of ride lengths
+max(all_2022_v2$ride_length) #longest ride
+min(all_2022_v2$ride_length) #shortest ride
+```
+#### 2.Compare members and casual users
+```{r Compare members and casual users}
+# Compare members and casual users
+aggregate(all_2022_v2$ride_length ~ all_2022_v2$member_casual, FUN = mean)
+aggregate(all_2022_v2$ride_length ~ all_2022_v2$member_casual, FUN = median)
+aggregate(all_2022_v2$ride_length ~ all_2022_v2$member_casual, FUN = max)
+aggregate(all_2022_v2$ride_length ~ all_2022_v2$member_casual, FUN = min)
+```
+#### 3.See the average ride time by each day for members vs casual users
+```{r average ride time by each day}
+aggregate(all_2022_v2$ride_length ~ all_2022_v2$member_casual + all_2022_v2$day_of_week, FUN = mean)
+```
+##### 4.Analyze ridership data by type and weekday
+```{r Analyze ridership data by type and weekday}
+library(lubridate)
+all_2022_v2 %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>%  #creates weekday field using wday()
+  group_by(member_casual, weekday) %>%  #groups by user type and weekday
+  summarise(number_of_rides = n()							#calculates the number of rides and average duration 
+            ,average_duration = mean(ride_length)) %>% 		# calculates the average duration
+  arrange(member_casual, weekday)								# sorts
+```
+### Step 3 Visualizations
+#### Let's visualize the number of rides by rider type
+```{r visualize the number of rides by rider type}
+all_2022_v2 %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual, weekday) %>% 
+  summarise(number_of_rides = n()
+            ,average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, weekday)  %>% 
+  ggplot(aes(x = weekday, y = number_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge")
+```
+#### Let's create a visualization for average duration
+```{r visualization for average duration}
+all_2022_v2 %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual, weekday) %>% 
+  summarise(number_of_rides = n()
+            ,average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, weekday)  %>% 
+  ggplot(aes(x = weekday, y = average_duration, fill = member_casual)) +
+  geom_col(position = "dodge")
+```
+
+
+
+
+
+
+Кінець
+
+
+
