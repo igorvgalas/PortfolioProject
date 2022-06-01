@@ -1,0 +1,113 @@
+-- Creating a datasets 
+-- 1)2021_TripDataset contains 12 tables tripdata per every month in 2021
+-- 2)uniondata2021 contains 2 tables tripdata per year by member and casual users
+
+-- Creating a table Month Coralation between members and casuals users
+
+drop table if exists cyclistic-351112.uniondata2021.MonthCoralation; 
+-- Help me to rerun my querys
+
+create table cyclistic-351112.uniondata2021.MonthCoralation
+        (monthID integer,
+        month string,
+        member INTEGER,
+        casual INTEGER,
+        quarter INTEGER);
+
+-- Insert data to my new table;
+--Shows rides per month by members and casuals users
+
+INSERT INTO cyclistic-351112.uniondata2021.MonthCoralation 
+       (monthID,
+        month,
+        member,casual,
+        quarter)
+VALUES (1,"January",(SELECT  COUNT(member_casual)
+       FROM `cyclistic-351112.2021_TripDataset.2021_01_tripdata` 
+       WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+       FROM `cyclistic-351112.2021_TripDataset.2021_01_tripdata` 
+       WHERE member_casual="casual"),1),
+       (2,"February",(SELECT  COUNT(member_casual)
+       FROM `cyclistic-351112.2021_TripDataset.2021_02_tripdata` 
+       WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+       FROM `cyclistic-351112.2021_TripDataset.2021_02_tripdata` 
+       where member_casual="casual"),1),
+      (3,"March",(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_03_tripdata` 
+      WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_03_tripdata` 
+      WHERE member_casual="casual"),1),
+      (4,"April",(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_04_tripdata` 
+      WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_04_tripdata` 
+      WHERE member_casual="casual"),2),
+      (5,"May",(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_05_tripdata` 
+      WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_05_tripdata` 
+      WHERE member_casual="casual"),2),
+      (6,"June",(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_06_tripdata` 
+      WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_06_tripdata` 
+      WHERE member_casual="casual"),2),
+      (7,"July",(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_07_tripdata` 
+      WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_07_tripdata` 
+      WHERE member_casual="casual"),3),
+      (8,"August",(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_08_tripdata` 
+      WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_08_tripdata` 
+      WHERE member_casual="casual"),3),
+      (9,"September",(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_09_tripdata` 
+      WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_09_tripdata` 
+      WHERE member_casual="casual"),3),
+      (10,"October",(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_10_tripdata` 
+      WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_10_tripdata` 
+      WHERE member_casual="casual"),4),
+      (11,"November",(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_11_tripdata` 
+      WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_11_tripdata` 
+      WHERE member_casual="casual"),4),
+      (12,"December",(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_12_tripdata` 
+      WHERE member_casual="member"),(SELECT  COUNT(member_casual)
+      FROM `cyclistic-351112.2021_TripDataset.2021_12_tripdata` 
+      WHERE member_casual="casual"),4);
+
+-- Check our table order by monthID
+
+SELECT DISTINCT *
+FROM cyclistic-351112.uniondata2021.MonthCoralation
+ORDER BY monthID;
+
+-- use MonthCoralation for several calculations for future visualizations
+
+-- Lets calculate 
+--1)number of member and casual users by quarter of the year, 
+WITH QuarterTrip as
+(SELECT quarter,
+       SUM(member) AS MemberPerQuarter,
+       SUM(casual) AS CasualPerQuarter
+      FROM cyclistic-351112.uniondata2021.MonthCoralation
+GROUP BY quarter)
+     
+--2)the difference in the number of users per Quarter
+
+SELECT quarter,
+       (MemberPerQuarter-CasualPerQuarter) AS DifMemCasPerQuarter
+FROM  QuarterTrip;
+
+--3)average number per year by month 
+SELECT 
+       ROUND(AVG(member),0) as memberAVRbyMonth,
+       ROUND(AVG(casual),0) as casualAVRbyMonth
+FROM cyclistic-351112.uniondata2021.MonthCoralation;
